@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FitZones - Ejercicios por zona muscular</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    svg { max-width: 400px; width: 100%; height: auto; }
+    .muscle { fill: #ccc; stroke: #888; stroke-width: 1; cursor: pointer; transition: fill 0.3s; }
+    .muscle:hover, .selected { fill: red !important; }
+    #info section { display: none; margin-top: 1rem; }
+    #info section.active { display: block; }
+    .header-img { max-width: 100%; height: auto; margin-bottom: 20px; border-radius: 10px; }
+  </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado ✔️'))
+        .catch(err => console.error('Error registrando Service Worker:', err));
+    }
+  </script>
+</head>
+<body class="bg-light">
+
+<div class="container my-4">
+  <h1 class="text-center mb-4">💪 FitZones</h1>
+  
+  <img src="https://drive.google.com/uc?export=view&id=1y7wd_T5eOHrNaWhDUCkmQf6nSwME00zE" alt="Banner" class="header-img">
+
+  <h3 class="text-center mb-3">Selecciona la zona que quieres trabajar</h3>
+
+  <svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+    <path id="pecho" class="muscle" d="M70,90 h60 v30 h-60 z" />
+    <path id="abdomen" class="muscle" d="M80,120 h40 v80 h-40 z" />
+    <path id="brazo_izq" class="muscle" d="M30,90 h30 v120 h-30 z" />
+    <path id="brazo_der" class="muscle" d="M140,90 h30 v120 h-30 z" />
+    <path id="piernas" class="muscle" d="M70,200 h60 v180 h-60 z" />
+  </svg>
+
+  <div id="info">
+    <section id="pecho_info">
+      <h4>Pecho</h4>
+      <ul><li>Bench Press</li><li>Push-ups</li><li>Dumbbell Flyes</li><li>Dips</li></ul>
+    </section>
+    <section id="abdomen_info">
+      <h4>Abdomen</h4>
+      <ul><li>Crunches</li><li>Planks</li><li>Leg Raises</li><li>Russian Twists</li></ul>
+    </section>
+    <section id="brazos_info">
+      <h4>Brazos</h4>
+      <ul><li>Bicep Curls</li><li>Hammer Curls</li><li>Tricep Extensions</li><li>Close-grip Bench Press</li></ul>
+    </section>
+    <section id="piernas_info">
+      <h4>Piernas</h4>
+      <ul><li>Squats</li><li>Lunges</li><li>Leg Press</li><li>Step-ups</li></ul>
+    </section>
+  </div>
+
+  <hr>
+
+  <h3 class="mt-5">Perfil y progreso</h3>
+  <form id="profileForm">
+    <div class="mb-3">
+      <label>Nombre:</label>
+      <input type="text" id="name" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Email:</label>
+      <input type="email" id="email" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Ejercicios realizados hoy:</label>
+      <textarea id="log" class="form-control" rows="4" placeholder="5 push‑ups, 10 sentadillas…"></textarea>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="saveData()">Guardar</button>
+  </form>
+
+  <div class="my-4">
+    <h4>Exportar datos</h4>
+    <button class="btn btn-success" onclick="exportData()">Exportar</button>
+    <pre id="exportedData" class="bg-light p-2 mt-2"></pre>
+  </div>
+
+  <div class="my-4">
+    <h4>Importar datos</h4>
+    <textarea id="importData" class="form-control" rows="4" placeholder='Pega aquí tus datos JSON'></textarea>
+    <button class="btn btn-primary mt-2" onclick="importData()">Importar</button>
+  </div>
+
+</div>
+
+<script>
+  // Gestión del SVG
+  const muscles = document.querySelectorAll('.muscle');
+  function clearSelection(){
+    muscles.forEach(m => m.classList.remove('selected'));
+    document.querySelectorAll('#info section').forEach(s => s.classList.remove('active'));
+  }
+  muscles.forEach(el => {
+    el.addEventListener('click', () => {
+      clearSelection();
+      el.classList.add('selected');
+      const id = el.id.includes('brazo') ? 'brazos' : el.id;
+      document.getElementById(id + '_info').classList.add('active');
+    });
+  });
+  document.getElementById('pecho').click();
+
+  // Perfil y progreso
+  function saveData(){
+    localStorage.setItem('name', document.getElementById('name').value);
+    localStorage.setItem('email', document.getElementById('email').value);
+    localStorage.setItem('log', document.getElementById('log').value);
+    alert('Datos guardados ✅');
+  }
+  function exportData() {
+    const data = {
+      name: localStorage.getItem('name') || '',
+      email: localStorage.getItem('email') || '',
+      log: localStorage.getItem('log') || ''
+    };
+    document.getElementById('exportedData').textContent = JSON.stringify(data, null, 2);
+  }
+  function importData() {
+    try {
+      const data = JSON.parse(document.getElementById('importData').value);
+      localStorage.setItem('name', data.name || '');
+      document.getElementById('email').value = data.email || '';
+      localStorage.setItem('log', data.log || '');
+      alert('Datos importados correctamente ✅');
+      location.reload();
+    } catch (e) {
+      alert('Error al importar los datos. Asegúrate de pegar un JSON válido.');
+    }
+  }
+  window.onload = () => {
+    document.getElementById('name').value = localStorage.getItem('name') || '';
+    document.getElementById('email').value = localStorage.getItem('email') || '';
+    document.getElementById('log').value = localStorage.getItem('log') || '';
+  };
+</script>
+
+</body>
+</html>

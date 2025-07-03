@@ -1,0 +1,16 @@
+{
+  "name": "FitZones",
+  "short_name": "FitZones",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "description": "Selecciona zonas musculares y obtén ejercicios personalizados.",
+  "icons": [
+    {
+      "src": "https://drive.google.com/uc?export=view&id=1y7wd_T5eOHrNaWhDUCkmQf6nSwME00zE",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
